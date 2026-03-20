@@ -43,9 +43,10 @@ jobs:
           composer update --prefer-dist --no-progress
 
       - name: Create OCI private key file
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          printf '%s
-' "${{ secrets.OCI_PRIVATE_KEY }}" > private_key.pem
+          echo "$OCI_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
 
       - name: Run test suite
@@ -65,4 +66,3 @@ jobs:
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
           OCI_SHAPE: VM.Standard.A1.Flex
           OCI_MAX_INSTANCES: 1
-
