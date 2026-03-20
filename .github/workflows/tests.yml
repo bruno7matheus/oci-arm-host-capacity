@@ -44,7 +44,8 @@ jobs:
 
       - name: Create OCI private key file
         run: |
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > private_key.pem
+          printf '%s
+' "${{ secrets.OCI_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
       - name: Run test suite
