@@ -2,8 +2,8 @@ name: Oracle VPS Sniper
 
 on:
   schedule:
-    - cron: '*/20 * * * *' # Tenta pescar a vaga a cada 20 minutos
-  workflow_dispatch: # Permite que você aperte um botão para rodar na hora
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
 
 jobs:
   pescar-vaga:
@@ -21,21 +21,30 @@ jobs:
     - name: Instalar dependências
       run: composer install --no-dev
 
-    - name: Montar a configuração
+    - name: Montar a configuração (Modo Blindado)
       run: |
-        echo "${{ secrets.OCI_PRIVATE_KEY }}" > oracle.pem
-        echo "OCI_USER_ID=${{ secrets.OCI_USER_ID }}" >> .env
-        echo "OCI_TENANCY_ID=${{ secrets.OCI_TENANCY_ID }}" >> .env
-        echo "OCI_KEY_FINGERPRINT=${{ secrets.OCI_KEY_FINGERPRINT }}" >> .env
-        echo "OCI_REGION=${{ secrets.OCI_REGION }}" >> .env
-        echo "OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}" >> .env
-        echo "OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}" >> .env
-        echo "OCI_OCPUS=4" >> .env
-        echo "OCI_MEMORY_IN_GBS=24" >> .env
-        echo "OCI_AVAILABILITY_DOMAIN=${{ secrets.OCI_AVAILABILITY_DOMAIN }}" >> .env
-        echo "OCI_SHAPE=VM.Standard.A1.Flex" >> .env
-        echo "OCI_PRIVATE_KEY_FILENAME=oracle.pem" >> .env
-        echo "OCI_SSH_PUBLIC_KEY=\"${{ secrets.OCI_SSH_PUBLIC_KEY }}\"" >> .env
+        cat << 'EOF' > oracle.pem
+        ${{ secrets.OCI_PRIVATE_KEY }}
+        EOF
+        
+        cat << 'EOF' > .env
+        OCI_USER_ID=${{ secrets.OCI_USER_ID }}
+        OCI_TENANCY_ID=${{ secrets.OCI_TENANCY_ID }}
+        OCI_KEY_FINGERPRINT=${{ secrets.OCI_KEY_FINGERPRINT }}
+        OCI_REGION=${{ secrets.OCI_REGION }}
+        OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}
+        OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}
+        OCI_OCPUS=4
+        OCI_MEMORY_IN_GBS=24
+        OCI_AVAILABILITY_DOMAIN=${{ secrets.OCI_AVAILABILITY_DOMAIN }}
+        OCI_SHAPE=VM.Standard.A1.Flex
+        OCI_PRIVATE_KEY_FILENAME=oracle.pem
+        EOF
+        
+        # Limpa aspas e quebras de linha perdidas da chave SSH
+        export SSH_KEY="${{ secrets.OCI_SSH_PUBLIC_KEY }}"
+        SSH_CLEAN=$(echo "$SSH_KEY" | tr -d '"' | tr -d '\n' | tr -d '\r')
+        echo "OCI_SSH_PUBLIC_KEY=\"$SSH_CLEAN\"" >> .env
 
     - name: Tentar criar a máquina na Oracle
       run: php index.php
