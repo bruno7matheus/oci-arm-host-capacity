@@ -21,35 +21,26 @@ jobs:
     - name: Instalar dependências
       run: composer install --no-dev
 
-    - name: Montar a configuração (Modo Ultra Blindado)
+    - name: Montar a configuração (Modo Infalível)
       env:
         PRIV_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
-        PUB_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-        USER_ID: ${{ secrets.OCI_USER_ID }}
-        TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-        FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-        REGION: ${{ secrets.OCI_REGION }}
-        SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-        IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
-        AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
       run: |
         echo "$PRIV_KEY" > oracle.pem
         
-        echo "OCI_USER_ID=$USER_ID" > .env
-        echo "OCI_TENANCY_ID=$TENANCY_ID" >> .env
-        echo "OCI_KEY_FINGERPRINT=$FINGERPRINT" >> .env
-        echo "OCI_REGION=$REGION" >> .env
-        echo "OCI_SUBNET_ID=$SUBNET_ID" >> .env
-        echo "OCI_IMAGE_ID=$IMAGE_ID" >> .env
-        echo "OCI_OCPUS=4" >> .env
-        echo "OCI_MEMORY_IN_GBS=24" >> .env
-        echo "OCI_AVAILABILITY_DOMAIN=$AVAILABILITY_DOMAIN" >> .env
-        echo "OCI_SHAPE=VM.Standard.A1.Flex" >> .env
-        echo "OCI_PRIVATE_KEY_FILENAME=oracle.pem" >> .env
-        
-        # Limpa aspas e quebras de linha perdidas da chave publica
-        PUB_CLEAN=$(echo "$PUB_KEY" | tr -d '"' | tr -d '\n' | tr -d '\r')
-        echo "OCI_SSH_PUBLIC_KEY=\"$PUB_CLEAN\"" >> .env
+        cat << 'EOF' > .env
+        OCI_USER_ID=ocid1.user.oc1..aaaaaaaadbdmbjyvaet5yz6ku7qxclwpbzdzycbwh3pvzbeyihgr3n2leooq
+        OCI_TENANCY_ID=ocid1.tenancy.oc1..aaaaaaaaliyp2lvika6atguhzc2gojd32oeyl4adfdcdnnieku3nets2czwa
+        OCI_KEY_FINGERPRINT=46:30:e9:c9:91:9a:08:8d:96:02:74:c4:f5:05:ee:b2
+        OCI_REGION=us-ashburn-1
+        OCI_SUBNET_ID=ocid1.subnet.oc1.iad.aaaaaaaadcemfmkbf564rbwvrthlyqfm3s34rw6dgtezbtbhcqmwgfqmuxkq
+        OCI_IMAGE_ID=ocid1.image.oc1.iad.aaaaaaaaccnswiekwi4w3pkmygjvfk24epduwj7uvq2smjmznu4kq6dcs27a
+        OCI_OCPUS=4
+        OCI_MEMORY_IN_GBS=24
+        OCI_AVAILABILITY_DOMAIN=VtYI:US-ASHBURN-AD-3
+        OCI_SHAPE=VM.Standard.A1.Flex
+        OCI_PRIVATE_KEY_FILENAME=oracle.pem
+        OCI_SSH_PUBLIC_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDZBZHQvvrnea+f+b6j7fUfEv6qFM/YaHQ5k4hCZxxEfLrVFiY2M0f6nK9PGMjHFSV3hZXiwR+ro2IsCp8bGjCEVS2Gnic/9TNo8RkXPWukYKpqR1PW7KHAsWRr74gGyUBni9fMtSKwFqCWrhuhU4zhO9US8Z/DgpcG3JbLrNRHo3+ZDC7XQFbxgul2FFc9QXwltKjP4mGdCIbYVLqDn0ZWBXgiLq9GnwFkvJWytBpgDSbZrd5UotJ31eURdU4LEqrJTHPabpqIX2uXeISsAUuGL8HbCIkoM3NmxZK0usIfWoXg9mgHYxiTrKM57qEMWgt5GfKtl9IU3tODMwteZC2T ssh-key-2026-03-19"
+        EOF
 
     - name: Tentar criar a máquina na Oracle
       run: php index.php
